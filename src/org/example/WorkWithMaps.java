@@ -1,9 +1,6 @@
 package org.example;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -13,7 +10,28 @@ public class WorkWithMaps {
     public static void main(String[] args) {
         System.out.println("imperative = " + imperative());
         System.out.println("functionalWithCollector = " + functionalWithCollector());
-        System.out.println("functional = " + functional());
+        System.out.println("functionalRecursive = " + functionalRecursive());
+        System.out.println("functionalWithReduce = " + functionalWithReduce());
+    }
+
+
+    private static Map<String, Double> functionalWithReduce() {
+        // https://stackoverflow.com/questions/66302292/changing-value-in-a-map-the-right-way/66302586?noredirect=1#comment117222541_66302586
+        Map<String, Double> input = prepareInput();
+        Map<String, List<Function<Double, Double>>> rules = prepareFunctions();
+
+        return input.entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> rules.getOrDefault(e.getKey(), Collections.emptyList())
+                                .stream()
+                                .reduce(
+                                        e.getValue(), // initial value from input
+                                        (res, fun) -> res > 0 ? res - fun.apply(res) : res, // accumulate
+                                        (res1, res2) -> res2 // combine
+                                )
+                ));
     }
 
     private static Map<String, Double> functionalWithCollector() {
@@ -26,7 +44,7 @@ public class WorkWithMaps {
                 .collect(CalculatorCollector::new, CalculatorCollector::add, CalculatorCollector::merge).getResult();
     }
 
-    private static Map<String, Double> functional() {
+    private static Map<String, Double> functionalRecursive() {
         Map<String, Double> input = prepareInput();
         Map<String, List<Function<Double, Double>>> rules = prepareFunctions();
 
