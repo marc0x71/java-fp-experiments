@@ -48,11 +48,8 @@ public class WorkWithMaps {
         Map<String, Double> input = prepareInput();
         Map<String, List<Function<Double, Double>>> rules = prepareFunctions();
 
-        Map<String, List<Function<Double, Double>>> functions = rules.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
         return input.entrySet().stream()
-                .map(e -> calculator(e, functions.get(e.getKey())))
+                .map(e -> calculator(e, rules.get(e.getKey())))
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
